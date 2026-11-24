@@ -1,0 +1,53 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: neonperfume-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-parfumerie}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-parfumerie_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-maison_verte}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-parfumerie} -d ${POSTGRES_DB:-maison_verte}"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: neonperfume-web
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${POSTGRES_USER:-parfumerie}:${POSTGRES_PASSWORD:-parfumerie_secret}@db:5432/${POSTGRES_DB:-maison_verte}?schema=public
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-maisonverte-admin}
+      ADMIN_SESSION_SECRET: ${ADMIN_SESSION_SECRET:-changez-moi-secret-session-tres-long-64-chars}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+    ports:
+      - "3000:3000"
+
+  adminer:
+    image: adminer:latest
+    container_name: neonperfume-adminer
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ADMINER_DEFAULT_SERVER: db
+      ADMINER_DESIGN: nette
+    ports:
+      - "8080:8080"
+
+volumes:
+  postgres_data:

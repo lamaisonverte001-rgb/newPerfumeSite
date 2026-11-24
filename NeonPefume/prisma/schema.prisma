@@ -1,0 +1,98 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Perfume {
+  id              String           @id @default(cuid())
+  slug            String           @unique
+  name            String
+  subtitle        String
+  description     String
+  story           String
+  olfactoryFamily String
+  topNotes        String[]
+  heartNotes      String[]
+  baseNotes       String[]
+  intensity       Int
+  longevity       String
+  imageUrl        String
+  accentHex       String           @default("#A68352")
+  labelStyle      String           @default("obsidian")
+  ingredients     String           @default("")
+  featured        Boolean          @default(false)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  variants        PerfumeVariant[]
+
+  @@index([olfactoryFamily])
+  @@index([featured])
+}
+
+model PerfumeVariant {
+  id         String      @id @default(cuid())
+  perfumeId  String
+  perfume    Perfume     @relation(fields: [perfumeId], references: [id], onDelete: Cascade)
+  volumeMl   Int
+  priceCents Int
+  stock      Int
+  sku        String      @unique
+  orderItems OrderItem[]
+
+  @@unique([perfumeId, volumeMl])
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  PREPARING
+  SHIPPED
+  CANCELLED
+}
+
+model Order {
+  id                 String      @id @default(cuid())
+  orderNumber        String      @unique
+  customerName       String
+  customerEmail      String
+  customerPhone      String
+  shippingAddress    String
+  shippingCity       String
+  shippingPostalCode String
+  shippingCountry    String
+  giftNote           String?
+  subtotalCents      Int
+  shippingCents      Int
+  totalCents         Int
+  status             OrderStatus @default(PAID)
+  createdAt          DateTime    @default(now())
+  items              OrderItem[]
+
+  @@index([createdAt])
+  @@index([status])
+}
+
+model OrderItem {
+  id             String         @id @default(cuid())
+  orderId        String
+  order          Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  variantId      String
+  variant        PerfumeVariant @relation(fields: [variantId], references: [id], onDelete: Restrict)
+  perfumeName    String
+  volumeMl       Int
+  unitPriceCents Int
+  quantity       Int
+
+  @@index([orderId])
+}
+
+model NewsletterSubscriber {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+}

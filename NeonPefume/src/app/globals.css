@@ -1,0 +1,107 @@
+@import "tailwindcss";
+
+:root {
+  --bg-alabaster: #FAF8F5;
+  --bg-stone: #F2EDE6;
+  --text-charcoal: #161616;
+  --text-taupe: #6B655E;
+  --accent-bronze: #A68352;
+  --accent-bronze-hover: #8E6E41;
+  --border-hairline: #E5DFD5;
+}
+
+@theme inline {
+  --color-background: var(--bg-alabaster);
+  --color-foreground: var(--text-charcoal);
+  --color-surface: var(--bg-stone);
+  --color-muted: var(--text-taupe);
+  --color-accent: var(--accent-bronze);
+  --color-border: var(--border-hairline);
+
+  --font-sans: var(--font-plus-jakarta), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-cormorant), Georgia, Cambria, "Times New Roman", serif;
+}
+
+html {
+  background-color: var(--bg-alabaster);
+  color: var(--text-charcoal);
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--bg-alabaster);
+  color: var(--text-charcoal);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+::selection {
+  background-color: rgba(166, 131, 82, 0.22);
+  color: #161616;
+}
+
+/* Editorial Hairline Utilities */
+.editorial-border {
+  border-color: var(--border-hairline);
+}
+
+.font-editorial {
+  font-family: var(--font-serif);
+}
+
+/* Smooth accordion transitions for Radix Accordion */
+@keyframes accordion-down {
+  from {
+    height: 0;
+  }
+  to {
+    height: var(--radix-accordion-content-height);
+  }
+}
+
+@keyframes accordion-up {
+  from {
+    height: var(--radix-accordion-content-height);
+  }
+  to {
+    height: 0;
+  }
+}
+
+.animate-accordion-down {
+  animation: accordion-down 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.animate-accordion-up {
+  animation: accordion-up 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Subtle alabaster grain texture overlay for editorial depth */
+.surface-paper {
+  background-image: radial-gradient(
+    rgba(22, 22, 22, 0.025) 1px,
+    transparent 0
+  );
+  background-size: 24px 24px;
+}
+
+/* Custom minimal scrollbar */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+::-webkit-scrollbar-track {
+  background: #FAF8F5;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #D6CEC2;
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #A68352;
+}
