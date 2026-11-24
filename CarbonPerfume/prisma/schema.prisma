@@ -1,0 +1,93 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  PREPARING
+  SHIPPED
+  CANCELLED
+}
+
+model Perfume {
+  id              String           @id @default(cuid())
+  slug            String           @unique
+  name            String
+  subtitle        String
+  description     String           @db.Text
+  story           String           @db.Text
+  olfactoryFamily String
+  topNotes        String[]
+  heartNotes      String[]
+  baseNotes       String[]
+  intensity       Int
+  longevity       String
+  imageUrl        String
+  accentColor     String           @default("#A68352")
+  ingredients     String           @default("") @db.Text
+  featured        Boolean          @default(false)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  variants        PerfumeVariant[]
+
+  @@index([olfactoryFamily])
+}
+
+model PerfumeVariant {
+  id         String      @id @default(cuid())
+  perfumeId  String
+  perfume    Perfume     @relation(fields: [perfumeId], references: [id], onDelete: Cascade)
+  volumeMl   Int
+  priceCents Int
+  stock      Int
+  sku        String      @unique
+  orderItems OrderItem[]
+
+  @@unique([perfumeId, volumeMl])
+}
+
+model Order {
+  id                 String      @id @default(cuid())
+  orderNumber        String      @unique
+  customerName       String
+  customerEmail      String
+  customerPhone      String
+  shippingAddress    String
+  shippingCity       String
+  shippingPostalCode String
+  shippingCountry    String
+  giftNote           String?     @db.Text
+  subtotalCents      Int
+  shippingCents      Int
+  totalCents         Int
+  status             OrderStatus @default(PAID)
+  createdAt          DateTime    @default(now())
+  items              OrderItem[]
+
+  @@index([createdAt])
+}
+
+model OrderItem {
+  id             String         @id @default(cuid())
+  orderId        String
+  order          Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  variantId      String
+  variant        PerfumeVariant @relation(fields: [variantId], references: [id])
+  perfumeName    String
+  volumeMl       Int
+  unitPriceCents Int
+  quantity       Int
+}
+
+model NewsletterSubscriber {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+}
